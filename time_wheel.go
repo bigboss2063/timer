@@ -139,6 +139,21 @@ func (t *timeWheel) AfterFunc(expire time.Duration, callback func()) TimeNoder {
 	return t.add(node, jiffies)
 }
 
+func (t *timeWheel) AfterFuncByTimeStamp(expireTimeStamp int64, callback func()) TimeNoder {
+	jiffies := atomic.LoadUint64(&t.jiffies)
+
+	expireTime := time.Unix(expireTimeStamp, 0)
+	expire := expireTime.Sub(time.Now())
+	expire = expire/(time.Millisecond*10) + time.Duration(jiffies)
+
+	node := &timeNode{
+		expire:   uint64(expire),
+		callback: callback,
+	}
+
+	return t.add(node, jiffies)
+}
+
 func getExpire(expire time.Duration, jiffies uint64) time.Duration {
 	return expire/(time.Millisecond*10) + time.Duration(jiffies)
 }
@@ -190,9 +205,9 @@ func (t *timeWheel) cascade(levelIndex int, index int) {
 }
 
 // moveAndExec函数功能
-//1. 先移动到near链表里面
-//2. near链表节点为空时，从上一层里面移动一些节点到下一层
-//3. 再执行
+// 1. 先移动到near链表里面
+// 2. near链表节点为空时，从上一层里面移动一些节点到下一层
+// 3. 再执行
 func (t *timeWheel) moveAndExec() {
 
 	// 这里时间溢出

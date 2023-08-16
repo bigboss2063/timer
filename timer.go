@@ -11,6 +11,9 @@ type Timer interface {
 	// 一次性定时器
 	AfterFunc(expire time.Duration, callback func()) TimeNoder
 
+	// 使用时间戳来指定过期时间的一次性定时器
+	AfterFuncByTimeStamp(expireTimeStamp int64, callback func()) TimeNoder
+
 	// 周期性定时器
 	ScheduleFunc(expire time.Duration, callback func()) TimeNoder
 

@@ -26,6 +26,13 @@ func (m *minHeap) AfterFunc(expire time.Duration, callback func()) TimeNoder {
 	return m.addCallback(expire, nil, callback, false)
 }
 
+func (t *minHeap) AfterFuncByTimeStamp(expireTimeStamp int64, callback func()) TimeNoder {
+	expireTime := time.Unix(expireTimeStamp, 0)
+	expire := expireTime.Sub(time.Now())
+
+	return t.addCallback(expire, nil, callback, false)
+}
+
 // 周期性定时器
 func (m *minHeap) ScheduleFunc(expire time.Duration, callback func()) TimeNoder {
 	return m.addCallback(expire, nil, callback, true)
